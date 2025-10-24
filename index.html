@@ -165,6 +165,8 @@
 <body>
   <header>
     <h1 class="site-title">Palestinitis</h1>
+	<button class="menu-toggle" aria-label="Menu">☰</button>
+	<div class="overlay"></div>
   </header>
 
   <div class="wrap">
@@ -336,6 +338,29 @@
       else if(/^chapter-\d+$/.test(h)) showById(h);
       else showById('chapter-1');
     });
+
+// --- Sidebar toggle for mobile ---
+const toggleBtn = document.querySelector('.menu-toggle');
+const sidebar = document.querySelector('nav.chapter-list');
+const overlay = document.querySelector('.overlay');
+
+toggleBtn.addEventListener('click', ()=>{
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+
+overlay.addEventListener('click', ()=>{
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+});
+
+// Close sidebar when a link is clicked (mobile UX)
+links.forEach(link => {
+  link.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  });
+});
   </script>
 </body>
 </html>
