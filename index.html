@@ -111,15 +111,50 @@
     }
     .mail-link{display:inline-block;margin-top:8px;font-size:16px}
 
-    /* small screens */
-    @media (max-width:880px){
-      .wrap{flex-direction:column;padding:0 18px}
-      nav.chapter-list{position:relative;top:0;width:100%;display:flex;overflow:auto;padding:12px 8px;border-right:none;border-bottom:1px solid #eee}
-      nav.chapter-list ul{display:flex;gap:14px}
-      nav.chapter-list a{font-size:15px}
-      main.reader{padding:24px 0}
-      .site-title{font-size:36px;padding:20px}
-    }
+   /* small screens (sidebar slides instead of moving on top) */
+@media (max-width:880px){
+  .wrap{padding:0 0 0 0;}
+
+  /* sidebar always left but slides off-canvas */
+  nav.chapter-list{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100%;
+    width:240px;
+    max-width:80%;
+    transform:translateX(-100%);
+    transition:transform 0.3s ease-out;
+    z-index:1000;
+    border-right:1px solid #eee;
+  }
+
+  nav.chapter-list.open{transform:translateX(0);} /* visible */
+
+  .menu-toggle{
+    display:block;
+    position:fixed;
+    top:14px;
+    left:14px;
+    font-size:28px;
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    z-index:1100;
+  }
+
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.4);
+    z-index:900;
+  }
+  .overlay.show{display:block;}
+
+  main.reader{padding:28px 20px;}
+}
 
     footer{padding:14px 20px;text-align:center;color:var(--muted);font-size:14px}
 
