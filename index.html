@@ -5,20 +5,57 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Palestinitis</title>
+<!-- Social sharing metadata -->
+<meta property="og:title" content="Palestinitis — arguing with idiots.">
+<meta property="og:description" content="Trying to make sense of the pro=palestinians' arguments.">
+<meta property="og:type" content="book">
+<meta property="og:image" content="https://palestinitis-book.github.io/Palestinitis/preview.jpg">
+<meta property="og:url" content="https://palestinitis-book.github.io/Palestinitis/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Palestinitis">
+<meta name="twitter:description" content="Trying to make sense of the pro=palestinians' arguments.">
+<meta name="twitter:image" content="https://palestinitis-book.github.io/Palestinitis/preview.jpg">
+<meta name="author" content="Herbert Pagani">
+<meta name="theme-color" content="#fbfbfb">
+<meta name="description" content="Palestinitis — arguing with idiots.">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
   <style>
-    :root{
-      --bg: #fbfbfb;
-      --panel: #ffffff;
-      --muted: #66615f;
-      --text: #111;
-      --accent: #000;
-      --max-width: 760px;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
+:root {
+  --bg: #fbfbfb;
+  --panel: #ffffff;
+  --muted: #66615f;
+  --text: #111;
+  --accent: #000;
+  --max-width: 760px;
+  --transition-speed: 0.3s;
+}
+
+/* soft dark mode theme variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f1f1f;
+    --panel: #2a2a2a;
+    --muted: #aaa;
+    --text: #f6f6f6;
+    --accent: #fff;
+  }
+}
+
+/* when toggled manually */
+body.dark {
+  --bg: #1f1f1f;
+  --panel: #2a2a2a;
+  --muted: #aaa;
+  --text: #f6f6f6;
+  --accent: #fff;
+}
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
       background:var(--bg);
       color:var(--text);
       -webkit-font-smoothing:antialiased;
@@ -144,6 +181,21 @@
     z-index:1100;
   }
 
+.dark-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  z-index: 1100;
+  transition: opacity var(--transition-speed);
+}
+.dark-toggle:hover { opacity: 0.7; }
+
+
   .overlay{
     display:none;
     position:fixed;
@@ -160,6 +212,30 @@
 
     /* small visual niceties */
     hr.sep{border:none;border-top:1px solid #f0f0f0;margin:8px 0}
+
+/* smooth transitions for theme and chapter changes */
+body, nav.chapter-list, main.reader, footer {
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+.chapter-content, .chapter-title {
+  scroll-behavior: smooth;
+}
+
+
+/* fade-in animation for new chapters */
+.chapter {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.chapter.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
   </style>
 </head>
 <body>
@@ -167,6 +243,7 @@
     <h1 class="site-title">Palestinitis</h1>
 	<button class="menu-toggle" aria-label="Menu">☰</button>
 	<div class="overlay"></div>
+<button class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
   </header>
 
   <div class="wrap">
@@ -626,6 +703,96 @@ links.forEach(link => {
     overlay.classList.remove('show');
   });
 });
+
+// --- Dark Mode Toggle ---
+const darkBtn = document.querySelector('.dark-toggle');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+if (localStorage.getItem('darkMode') === 'true' || (prefersDark && !localStorage.getItem('darkMode'))) {
+  document.body.classList.add('dark');
+}
+darkBtn.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+});
+
+// --- Remember last read chapter ---
+window.addEventListener('beforeunload', ()=>{
+  const active = document.querySelector('nav.chapter-list a.active');
+  if(active){
+    localStorage.setItem('lastChapter', active.getAttribute('href'));
+  }
+});
+window.addEventListener('load', ()=>{
+  const last = localStorage.getItem('lastChapter');
+  if(last && !location.hash){
+    history.replaceState({}, '', last);
+  }
+});
+
+// --- Smooth scroll to top on chapter switch ---
+function smoothScrollToTop(){
+  const reader = document.querySelector('main.reader');
+  reader.scrollTo({ top: 0, behavior: 'smooth' });
+}
+links.forEach(link => {
+  link.addEventListener('click', () => setTimeout(smoothScrollToTop, 150));
+});
+
+// --- Anchor links for subheadings ---
+document.querySelectorAll('.chapter-content h2, .chapter-content h3').forEach(h => {
+  const id = h.textContent.trim().toLowerCase().replace(/[^\w]+/g, '-');
+  h.id = id;
+  const anchor = document.createElement('a');
+  anchor.href = '#' + id;
+  anchor.textContent = ' #';
+  anchor.style.textDecoration = 'none';
+  anchor.style.opacity = '0.4';
+  anchor.style.marginLeft = '4px';
+  anchor.addEventListener('mouseenter', ()=>anchor.style.opacity='1');
+  anchor.addEventListener('mouseleave', ()=>anchor.style.opacity='0.4');
+  h.appendChild(anchor);
+});
+
+
+// --- Fade-in effect when showing a new chapter ---
+function revealChapter(el) {
+  requestAnimationFrame(() => {
+    el.classList.add('visible');
+  });
+}
+
+// Modify showById() to use the fade-in
+const oldShowById = showById;
+showById = function(id){
+  // hide all chapters and contact
+  chapters.forEach(c=>{
+    c.hidden = true;
+    c.classList.remove('visible');
+  });
+  contactSection.hidden = true;
+
+  // remove active
+  links.forEach(a=>a.classList.remove('active'));
+
+  if(id === 'contact'){
+    contactSection.hidden = false;
+    document.querySelector('nav.chapter-list a[href="#contact"]').classList.add('active');
+    contactSection.scrollIntoView({block:'start'});
+    return;
+  }
+
+  const el = document.getElementById(id);
+  if(el){
+    el.hidden = false;
+    const link = document.querySelector(`nav.chapter-list a[href="#${id}"]`);
+    if(link) link.classList.add('active');
+    smoothScrollToTop();
+    revealChapter(el);
+  }
+};
+
+
+
   </script>
 </body>
 </html>
